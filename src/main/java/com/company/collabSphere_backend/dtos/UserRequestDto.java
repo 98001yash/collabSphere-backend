@@ -13,15 +13,20 @@ import lombok.*;
 @Builder
 public class UserRequestDto {
 
-    @Email
     @NotBlank
+    private String name;
+
+    @Email
     private String email;
 
     @NotBlank
-    private String role;   // student, faculty, mentor
+    private String password;
+
+    private String role;
+
     private String bio;
 
-    @NotBlank
-    @Size(min = 6)
-    private String password;
+    // location provided as latitude & longitude
+    private Double latitude;
+    private Double longitude;
 }

@@ -7,8 +7,8 @@ import lombok.*;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class ProjectRequestDto {
 
@@ -17,10 +17,10 @@ public class ProjectRequestDto {
 
     private String description;
 
-    private String githubLink;
+    @NotBlank
+    private String repoUrl;
 
-    private String demoLink;
-
-    @NotNull
-    private Long ownerId;
+    // project geo-location
+    private Double latitude;
+    private Double longitude;
 }

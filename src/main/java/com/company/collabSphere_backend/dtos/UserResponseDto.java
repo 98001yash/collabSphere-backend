@@ -9,12 +9,13 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class UserResponseDto {
-
     private Long id;
-    private String email;
     private String name;
+    private String email;
     private String role;
     private String bio;
+
+    // flatten the Point into lat/lng
     private Double latitude;
     private Double longitude;
 }
