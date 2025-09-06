@@ -1,6 +1,5 @@
 package com.company.collabSphere_backend.config;
 
-
 import com.company.collabSphere_backend.dtos.ProjectRequestDto;
 import com.company.collabSphere_backend.dtos.ProjectResponseDto;
 import com.company.collabSphere_backend.dtos.UserRequestDto;
@@ -25,22 +24,12 @@ public class MapperConfig {
             m.map(src -> GeometryUtil.getLongitude(src.getLocation()), UserResponseDto::setLongitude);
         });
 
-        // UserRequestDto → User
-        mapper.typeMap(UserRequestDto.class, User.class).addMappings(m -> {
-            m.map(src -> GeometryUtil.createPoint(src.getLatitude(), src.getLongitude()), User::setLocation);
-        });
-
         // Project → ProjectResponseDto
         mapper.typeMap(Project.class, ProjectResponseDto.class).addMappings(m -> {
             m.map(src -> src.getOwner().getId(), ProjectResponseDto::setOwnerId);
             m.map(src -> src.getOwner().getName(), ProjectResponseDto::setOwnerName);
             m.map(src -> GeometryUtil.getLatitude(src.getLocation()), ProjectResponseDto::setLatitude);
             m.map(src -> GeometryUtil.getLongitude(src.getLocation()), ProjectResponseDto::setLongitude);
-        });
-
-        // ProjectRequestDto → Project
-        mapper.typeMap(ProjectRequestDto.class, Project.class).addMappings(m -> {
-            m.map(src -> GeometryUtil.createPoint(src.getLatitude(), src.getLongitude()), Project::setLocation);
         });
 
         return mapper;

@@ -5,6 +5,7 @@ import com.company.collabSphere_backend.dtos.UserResponseDto;
 import com.company.collabSphere_backend.entity.User;
 import com.company.collabSphere_backend.exceptions.ResourceNotFoundException;
 import com.company.collabSphere_backend.repository.UserRepository;
+import com.company.collabSphere_backend.utils.GeometryUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -32,14 +33,29 @@ public class UserService {
             throw new IllegalArgumentException("Email already exists");
         }
 
-        User user = modelMapper.map(userRequestDto, User.class);
+        // Create User manually instead of letting ModelMapper handle everything
+        User user = new User();
+        user.setName(userRequestDto.getName());
+        user.setEmail(userRequestDto.getEmail());
+        user.setRole(userRequestDto.getRole());
+        user.setBio(userRequestDto.getBio());
         user.setPasswordHash(passwordEncoder.encode(userRequestDto.getPassword()));
 
+        // Handle location
+        if (userRequestDto.getLatitude() != null && userRequestDto.getLongitude() != null) {
+            user.setLocation(GeometryUtil.createPoint(
+                    userRequestDto.getLatitude(),
+                    userRequestDto.getLongitude()
+            ));
+        }
         User savedUser = userRepository.save(user);
         log.info("User registered successfully with id: {}", savedUser.getId());
 
         return modelMapper.map(savedUser, UserResponseDto.class);
     }
+
+
+
 
     // Get all users
     public List<UserResponseDto> getAllUsers() {

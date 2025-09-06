@@ -8,6 +8,7 @@ import com.company.collabSphere_backend.enums.ProjectStatus;
 import com.company.collabSphere_backend.exceptions.ResourceNotFoundException;
 import com.company.collabSphere_backend.repository.ProjectRepository;
 import com.company.collabSphere_backend.repository.UserRepository;
+import com.company.collabSphere_backend.utils.GeometryUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -36,11 +37,17 @@ public class ProjectService {
         project.setOwner(owner);
         project.setStatus(ProjectStatus.PENDING);
 
+        //  Ensure location is set (fallback in case ModelMapper skips it)
+        project.setLocation(
+                GeometryUtil.createPoint(projectRequestDto.getLatitude(), projectRequestDto.getLongitude())
+        );
+
         Project savedProject = projectRepository.save(project);
         log.info("Project created successfully with id: {}", savedProject.getId());
 
         return modelMapper.map(savedProject, ProjectResponseDto.class);
     }
+
 
     // Get all projects
     public List<ProjectResponseDto> getAllProjects() {
