@@ -1,15 +1,11 @@
 package com.company.collabSphere_backend.controller;
 
-
-import com.company.collabSphere_backend.dtos.UserRequestDto;
 import com.company.collabSphere_backend.dtos.UserResponseDto;
 import com.company.collabSphere_backend.service.UserService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 
@@ -22,11 +18,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<UserResponseDto> registerUser(@Valid @RequestBody UserRequestDto userRequestDto){
-        log.info("Registering user with email: {}",userRequestDto.getEmail());
-        return ResponseEntity.ok(userService.registerUser(userRequestDto));
-    }
+
 
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> getAllUsers(){
