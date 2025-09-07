@@ -54,9 +54,6 @@ public class UserService {
         return modelMapper.map(savedUser, UserResponseDto.class);
     }
 
-
-
-
     // Get all users
     public List<UserResponseDto> getAllUsers() {
         log.info("Fetching all users");
