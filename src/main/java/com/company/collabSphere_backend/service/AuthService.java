@@ -6,6 +6,7 @@ import com.company.collabSphere_backend.dtos.LoginRequestDto;
 import com.company.collabSphere_backend.dtos.UserRequestDto;
 import com.company.collabSphere_backend.dtos.UserResponseDto;
 import com.company.collabSphere_backend.entity.User;
+import com.company.collabSphere_backend.exceptions.ResourceNotFoundException;
 import com.company.collabSphere_backend.repository.UserRepository;
 import com.company.collabSphere_backend.security.JwtService;
 import com.company.collabSphere_backend.utils.GeometryUtil;
