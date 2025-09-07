@@ -1,10 +1,11 @@
 package com.company.collabSphere_backend.service;
 
 
+import com.company.collabSphere_backend.dtos.AuthResponseDto;
+import com.company.collabSphere_backend.dtos.LoginRequestDto;
 import com.company.collabSphere_backend.dtos.UserRequestDto;
 import com.company.collabSphere_backend.dtos.UserResponseDto;
 import com.company.collabSphere_backend.entity.User;
-import com.company.collabSphere_backend.exceptions.ResourceNotFoundException;
 import com.company.collabSphere_backend.repository.UserRepository;
 import com.company.collabSphere_backend.security.JwtService;
 import com.company.collabSphere_backend.utils.GeometryUtil;
@@ -24,40 +25,51 @@ public class AuthService {
     private final JwtService jwtService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public String register(UserRequestDto userRequestDto) {
-        log.info("Registering new user with email {}", userRequestDto.getEmail());
+    // Register new user
+    public AuthResponseDto register(UserRequestDto requestDto) {
+        log.info("Registering new user with email {}", requestDto.getEmail());
 
-        if (userRepository.findByEmail(userRequestDto.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(requestDto.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already exists");
         }
 
         User user = new User();
-        user.setName(userRequestDto.getName());
-        user.setEmail(userRequestDto.getEmail());
-        user.setRole(userRequestDto.getRole());
-        user.setBio(userRequestDto.getBio());
-        user.setPasswordHash(passwordEncoder.encode(userRequestDto.getPassword()));
+        user.setName(requestDto.getName());
+        user.setEmail(requestDto.getEmail());
+        user.setRole(requestDto.getRole());
+        user.setBio(requestDto.getBio());
+        user.setPasswordHash(passwordEncoder.encode(requestDto.getPassword()));
 
-        if (userRequestDto.getLatitude() != null && userRequestDto.getLongitude() != null) {
-            user.setLocation(GeometryUtil.createPoint(
-                    userRequestDto.getLatitude(),
-                    userRequestDto.getLongitude()
-            ));
+        if (requestDto.getLatitude() != null && requestDto.getLongitude() != null) {
+            user.setLocation(GeometryUtil.createPoint(requestDto.getLatitude(), requestDto.getLongitude()));
         }
+
         User saved = userRepository.save(user);
-        return jwtService.generateToken(saved.getEmail(), saved.getRole().name());
+
+        String token = jwtService.generateToken(saved.getEmail(), saved.getRole().name());
+
+        return AuthResponseDto.builder()
+                .token(token)
+                .user(modelMapper.map(saved, UserResponseDto.class))
+                .build();
     }
 
-    public String login(String email, String rawPassword) {
-        log.info("Authenticating user {}", email);
+    // Login existing user
+    public AuthResponseDto login(LoginRequestDto loginRequest) {
+        log.info("Login attempt for email {}", loginRequest.getEmail());
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email " + email));
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
-        if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
-            throw new IllegalArgumentException("Invalid credentials");
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("Invalid email or password");
         }
 
-        return jwtService.generateToken(user.getEmail(), user.getRole().name());
+        String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
+
+        return AuthResponseDto.builder()
+                .token(token)
+                .user(modelMapper.map(user, UserResponseDto.class))
+                .build();
     }
 }
