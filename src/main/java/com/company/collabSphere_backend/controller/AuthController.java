@@ -1,9 +1,8 @@
 package com.company.collabSphere_backend.controller;
 
-import com.company.collabSphere_backend.dtos.AuthResponseDto;
-import com.company.collabSphere_backend.dtos.LoginRequestDto;
-import com.company.collabSphere_backend.dtos.UserRequestDto;
+import com.company.collabSphere_backend.dtos.*;
 import com.company.collabSphere_backend.service.AuthService;
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +18,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDto> register(@RequestBody UserRequestDto request) {
-        return ResponseEntity.ok(authService.register(request));
+    @PermitAll
+    public ResponseEntity<UserResponseDto> register(@Valid @RequestBody UserRequestDto requestDto) {
+        return ResponseEntity.ok(authService.register(requestDto));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody LoginRequestDto request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto loginRequest) {
+        return ResponseEntity.ok(authService.login(loginRequest));
     }
 }

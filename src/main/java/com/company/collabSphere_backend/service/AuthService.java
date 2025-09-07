@@ -1,10 +1,7 @@
 package com.company.collabSphere_backend.service;
 
 
-import com.company.collabSphere_backend.dtos.AuthResponseDto;
-import com.company.collabSphere_backend.dtos.LoginRequestDto;
-import com.company.collabSphere_backend.dtos.UserRequestDto;
-import com.company.collabSphere_backend.dtos.UserResponseDto;
+import com.company.collabSphere_backend.dtos.*;
 import com.company.collabSphere_backend.entity.User;
 import com.company.collabSphere_backend.exceptions.ResourceNotFoundException;
 import com.company.collabSphere_backend.repository.UserRepository;
@@ -27,7 +24,7 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     // Register new user
-    public AuthResponseDto register(UserRequestDto requestDto) {
+    public UserResponseDto register(UserRequestDto requestDto) {
         log.info("Registering new user with email {}", requestDto.getEmail());
 
         if (userRepository.findByEmail(requestDto.getEmail()).isPresent()) {
@@ -47,16 +44,11 @@ public class AuthService {
 
         User saved = userRepository.save(user);
 
-        String token = jwtService.generateToken(saved.getEmail(), saved.getRole().name());
-
-        return AuthResponseDto.builder()
-                .token(token)
-                .user(modelMapper.map(saved, UserResponseDto.class))
-                .build();
+        return modelMapper.map(saved, UserResponseDto.class);
     }
 
-    // Login existing user
-    public AuthResponseDto login(LoginRequestDto loginRequest) {
+    // Login existing user → return only token
+    public LoginResponseDto login(LoginRequestDto loginRequest) {
         log.info("Login attempt for email {}", loginRequest.getEmail());
 
         User user = userRepository.findByEmail(loginRequest.getEmail())
@@ -68,9 +60,8 @@ public class AuthService {
 
         String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
 
-        return AuthResponseDto.builder()
+        return LoginResponseDto.builder()
                 .token(token)
-                .user(modelMapper.map(user, UserResponseDto.class))
                 .build();
     }
 }

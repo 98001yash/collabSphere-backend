@@ -4,10 +4,12 @@ import com.company.collabSphere_backend.dtos.ProjectRequestDto;
 import com.company.collabSphere_backend.dtos.ProjectResponseDto;
 import com.company.collabSphere_backend.enums.ProjectStatus;
 import com.company.collabSphere_backend.service.ProjectService;
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +24,7 @@ public class ProjectController {
 
     // Create project
     @PostMapping("/create/{ownerId}")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ProjectResponseDto> createProject(
             @PathVariable Long ownerId,
             @Valid @RequestBody ProjectRequestDto projectRequestDto
@@ -32,6 +35,7 @@ public class ProjectController {
 
     // Get all projects
     @GetMapping
+    @PermitAll
     public ResponseEntity<List<ProjectResponseDto>> getAllProjects() {
         log.info("Fetching all projects");
         return ResponseEntity.ok(projectService.getAllProjects());
@@ -39,6 +43,7 @@ public class ProjectController {
 
     // Get project by id
     @GetMapping("/{id}")
+    @PermitAll
     public ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable Long id) {
         log.info("Fetching project with id: {}", id);
         return ResponseEntity.ok(projectService.getProjectById(id));
@@ -46,6 +51,7 @@ public class ProjectController {
 
     // Update project status
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('FACULTY','ADMIN')")
     public ResponseEntity<ProjectResponseDto> updateProjectStatus(
             @PathVariable Long id,
             @RequestParam ProjectStatus status
@@ -56,6 +62,7 @@ public class ProjectController {
 
     // Delete project
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
         log.info("Deleting project with id: {}", id);
         projectService.deleteProject(id);
