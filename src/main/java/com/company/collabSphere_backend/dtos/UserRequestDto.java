@@ -1,6 +1,7 @@
 package com.company.collabSphere_backend.dtos;
 
 
+import com.company.collabSphere_backend.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -22,7 +23,7 @@ public class UserRequestDto {
     @NotBlank
     private String password;
 
-    private String role;
+    private Role role;
 
     private String bio;
 

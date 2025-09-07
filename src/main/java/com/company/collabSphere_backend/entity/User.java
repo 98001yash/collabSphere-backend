@@ -1,6 +1,7 @@
 package com.company.collabSphere_backend.entity;
 
 
+import com.company.collabSphere_backend.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -30,8 +31,9 @@ public class User {
     @Column(nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role;
+    private Role role;
 
     @Column
     private String bio;
