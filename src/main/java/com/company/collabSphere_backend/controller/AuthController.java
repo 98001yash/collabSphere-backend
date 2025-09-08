@@ -17,6 +17,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+    //  permission to all the people to register
     @PostMapping("/register")
     @PermitAll
     public ResponseEntity<UserResponseDto> register(@Valid @RequestBody UserRequestDto requestDto) {
