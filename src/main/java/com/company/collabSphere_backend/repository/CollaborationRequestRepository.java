@@ -13,7 +13,7 @@ public interface CollaborationRequestRepository extends JpaRepository<Collaborat
 
     boolean existsByProjectAndStudent(Project project, User student);
 
-    Optional<CollaborationRequest> findByProjectAndStudent(Project project, User student);
+    Optional<CollaborationRequest> findByStudentAndProject(User student, Project project);
 
     List<CollaborationRequest> findByProject(Project project);
 
