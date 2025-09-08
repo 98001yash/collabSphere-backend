@@ -14,9 +14,10 @@ import com.company.collabSphere_backend.repository.ProjectRepository;
 import com.company.collabSphere_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -71,5 +72,29 @@ public class CollaborationRequestService {
 
         log.info("Request {} updated to {}",updated.getId(),updated.getStatus());
         return modelMapper.map(updated, CollaborationResponseDto.class);
+    }
+
+    // get all request for a project
+    public List<CollaborationResponseDto> getRequestsForProject(Long projectId){
+        log.info("Fetching collaboration requests for project {}",projectId);
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(()->new ResourceNotFoundException("Project not found with id "+projectId));
+
+        return collaborationRequestRepository.findByProject(project).stream()
+                .map(req->modelMapper.map(req, CollaborationResponseDto.class))
+                .collect(Collectors.toList());
+    }
+
+    // get all requests made by a student
+    public List<CollaborationResponseDto> getRequestsByStudent(Long studentId){
+        log.info("Fetching collaboration requests made by student {}",studentId);
+
+        User student = userRepository.findById(studentId)
+                .orElseThrow(()-> new ResourceNotFoundException("Student not found with id "+studentId));
+
+        return collaborationRequestRepository.findByStudent(student).stream()
+                .map(req-> modelMapper.map(req, CollaborationResponseDto.class))
+                .collect(Collectors.toList());
     }
 }
