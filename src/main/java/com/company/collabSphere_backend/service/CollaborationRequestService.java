@@ -38,6 +38,12 @@ public class CollaborationRequestService {
         Project project = projectRepository.findById(requestDto.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id " + requestDto.getProjectId()));
 
+        //  Prevent owner from applying to their own project
+        if (project.getOwner().getId().equals(student.getId())) {
+            log.error("Owner {} attempted to apply for their own project {}", student.getId(), project.getId());
+            throw new IllegalArgumentException("Project owner cannot apply for collaboration on their own project");
+        }
+
         // Prevent duplicates requests
         collaborationRequestRepository.findByStudentAndProject(student, project)
                 .ifPresent(existing -> {
