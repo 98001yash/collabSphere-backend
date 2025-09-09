@@ -35,7 +35,7 @@ public class OpportunityResponseDto {
     private BigDecimal stipendMax;
 
     private LocalDate startDate;
-    private LocalDate ebdDate;
+    private LocalDate endDate;
 
     private LocalDateTime applicationDeadline;
 

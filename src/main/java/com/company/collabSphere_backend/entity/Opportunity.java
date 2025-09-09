@@ -70,7 +70,7 @@ public class Opportunity {
 
     private LocalDateTime applicationDeadline;
 
-    @Column(columnDefinition = "geometry(Point, 4326")
+    @Column(columnDefinition = "geometry(Point,4326)")
     private Point location;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
