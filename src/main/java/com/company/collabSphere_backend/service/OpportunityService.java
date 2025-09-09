@@ -62,14 +62,25 @@ public class OpportunityService {
 
 
     @Transactional
-    public OpportunityResponseDto publishOpportunity(Long id){
-        log.info("Publishing opportunity with id: {}",id);
+    public OpportunityResponseDto publishOpportunity(Long id) {
+        log.info("Publishing opportunity with id: {}", id);
+
+
         Opportunity opportunity = opportunityRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Opportunity not found with id " + id));
 
         opportunity.setStatus(OpportunityStatus.PUBLISHED);
-        return modelMapper.map(opportunityRepository.save(opportunity), OpportunityResponseDto.class);
+
+        Opportunity saved = opportunityRepository.save(opportunity);
+        OpportunityResponseDto dto = modelMapper.map(saved, OpportunityResponseDto.class);
+        if (saved.getLocation() != null) {
+            dto.setLatitude(saved.getLocation().getY()); // latitude
+            dto.setLongitude(saved.getLocation().getX()); // longitude
+        }
+
+        return dto;
     }
+
 
     public List<OpportunityResponseDto> getActiveOpportunities() {
         log.info("Fetching all active opportunities");
