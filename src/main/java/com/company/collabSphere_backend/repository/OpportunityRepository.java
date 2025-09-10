@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface OpportunityRepository extends JpaRepository<Opportunity,Long> {
 
-    List<Opportunity> findByStatus(Opportunity status);
+    List<Opportunity> findByStatus(OpportunityStatus status);
 
     List<Opportunity> findByTypeAndStatus(OpportunityType type, OpportunityStatus status);
 
