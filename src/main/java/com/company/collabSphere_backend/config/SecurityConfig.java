@@ -34,14 +34,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> {}) // <-- enable CORS
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints (no token required)
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Admin-only endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        // Faculty-only
                         .requestMatchers("/api/endorsements/**").hasRole("FACULTY")
-                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -50,6 +47,8 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+
 
     @Bean
     public AuthenticationProvider authenticationProvider() {

@@ -62,6 +62,7 @@ public class AuthService {
 
         return LoginResponseDto.builder()
                 .token(token)
+                .user(modelMapper.map(user, UserResponseDto.class)) // include user info
                 .build();
     }
 }
