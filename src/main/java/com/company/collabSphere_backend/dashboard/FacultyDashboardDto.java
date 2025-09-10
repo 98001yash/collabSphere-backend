@@ -6,11 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 
-// faculty dashboard DTOs
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,10 +18,7 @@ public class FacultyDashboardDto {
     private String name;
     private String email;
 
-    private List<ProjectDto> ownedProjects;
     private List<PendingCollaborationRequestDto> pendingCollaborationRequests;
     private List<EndorsementDto> endorsementsGiven;
 }
-
-
 

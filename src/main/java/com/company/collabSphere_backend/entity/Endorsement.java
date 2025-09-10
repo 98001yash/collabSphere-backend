@@ -38,5 +38,8 @@ public class Endorsement {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+    @ManyToOne
+    private User student;
+
 
 }
