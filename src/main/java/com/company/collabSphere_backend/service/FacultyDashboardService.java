@@ -2,7 +2,6 @@ package com.company.collabSphere_backend.service;
 
 import com.company.collabSphere_backend.dashboard.*;
 import com.company.collabSphere_backend.entity.User;
-import com.company.collabSphere_backend.enums.OpportunityStatus;
 import com.company.collabSphere_backend.exceptions.ResourceNotFoundException;
 import com.company.collabSphere_backend.repository.CollaborationRequestRepository;
 import com.company.collabSphere_backend.repository.EndorsementRepository;
