@@ -11,4 +11,10 @@ public interface EndorsementRepository extends JpaRepository<Endorsement,Long> {
 
     List<Endorsement> findByProject(Project project);
     List<Endorsement> findByFaculty(User faculty);
+
+    // For student dashboard: endorsements received
+    List<Endorsement> findByStudentId(Long studentId);
+
+    // for faculty dashboard: endorsements given by faculty
+    List<Endorsement> findByFacultyId(Long facultyId);
 }
