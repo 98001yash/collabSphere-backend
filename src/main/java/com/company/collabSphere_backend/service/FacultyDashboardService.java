@@ -35,10 +35,12 @@ public class FacultyDashboardService {
 
         // Opportunities posted by this faculty (if you keep this, else remove if not needed)
         List<OpportunityDto> opportunitiesPosted = opportunityRepository
-                .findByOwner(faculty)
+                .findByCreatedBy(faculty)  // This works now
                 .stream()
                 .map(op -> modelMapper.map(op, OpportunityDto.class))
                 .collect(Collectors.toList());
+
+
 
         // Pending Collaboration requests for faculty’s projects
         List<PendingCollaborationRequestDto> pendingCollaborationRequests = collaborationRequestRepository

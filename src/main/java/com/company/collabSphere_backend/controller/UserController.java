@@ -1,7 +1,9 @@
 package com.company.collabSphere_backend.controller;
 
+import com.company.collabSphere_backend.dashboard.FacultyDashboardDto;
 import com.company.collabSphere_backend.dashboard.StudentDashboardDto;
 import com.company.collabSphere_backend.dtos.UserResponseDto;
+import com.company.collabSphere_backend.service.FacultyDashboardService;
 import com.company.collabSphere_backend.service.StudentDashboardService;
 import com.company.collabSphere_backend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class UserController {
 
     private final UserService userService;
     private final StudentDashboardService studentDashboardService;
+    private final FacultyDashboardService facultyDashboardService;
 
 
 
@@ -63,5 +66,14 @@ public class UserController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<StudentDashboardDto> getStudentDashboard(@PathVariable Long id){
         return ResponseEntity.ok(studentDashboardService.getStudentDashboard(id));
+    }
+
+
+    // get Faculty Dashboard
+    @GetMapping("/faculty/{facultyId}")
+    @PreAuthorize("hasRole('FACULTY')")
+    public ResponseEntity<FacultyDashboardDto> getFacultyDashboard(@PathVariable Long facultyId) {
+        log.info("Fetching dashboard for faculty {}", facultyId);
+        return ResponseEntity.ok(facultyDashboardService.getFacultyDashboard(facultyId));
     }
 }
