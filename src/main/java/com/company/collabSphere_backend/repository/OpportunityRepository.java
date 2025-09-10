@@ -14,5 +14,13 @@ public interface OpportunityRepository extends JpaRepository<Opportunity,Long> {
 
     List<Opportunity> findByTypeAndStatus(OpportunityType type, OpportunityStatus status);
 
-    List<Opportunity> findByStatusAndApplicationDeadlineAfter(OpportunityStatus status, LocalDateTime now);
+
+    // for student dashboard: get all active dashboard + deadline not passed
+    List<Opportunity> findByStatusAndApplicationDeadlineAfter(OpportunityStatus status,
+                                                              LocalDateTime now);
+
+
+    // for faculty dashboard: get all opportunity created by a faculty
+    List<Opportunity> findByCreatedById(Long facultyId);
+
 }
