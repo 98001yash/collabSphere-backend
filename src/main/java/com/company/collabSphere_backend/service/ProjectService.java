@@ -11,6 +11,7 @@ import com.company.collabSphere_backend.repository.UserRepository;
 import com.company.collabSphere_backend.utils.GeometryUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.ResourceClosedException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -92,6 +93,15 @@ public class ProjectService {
         log.info("Project with id {} deleted successfully", id);
     }
 
+    // Get project for a specific owner
+    public List<ProjectResponseDto> getProjectByOwner(Long ownerId){
+        log.info("Fetching projects for ownerId: {}",ownerId);
 
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(()->new ResourceClosedException("Owner not found with id: "+ownerId));
 
+        return projectRepository.findByOwner(owner).stream()
+                .map(project->modelMapper.map(project, ProjectResponseDto.class))
+                .collect(Collectors.toList());
+    }
 }
