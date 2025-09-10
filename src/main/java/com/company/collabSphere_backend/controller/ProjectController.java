@@ -68,4 +68,14 @@ public class ProjectController {
         projectService.deleteProject(id);
         return ResponseEntity.noContent().build();
     }
+
+
+    // Get projects for a specific student
+
+    @GetMapping("/owner/{ownerId}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<List<ProjectResponseDto>> getProjectsByOwner(@PathVariable Long ownerId) {
+        log.info("Fetching projects for ownerId: {}", ownerId);
+        return ResponseEntity.ok(projectService.getProjectByOwner(ownerId));
+    }
 }
