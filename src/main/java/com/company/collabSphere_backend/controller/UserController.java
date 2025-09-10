@@ -1,6 +1,8 @@
 package com.company.collabSphere_backend.controller;
 
+import com.company.collabSphere_backend.dashboard.StudentDashboardDto;
 import com.company.collabSphere_backend.dtos.UserResponseDto;
+import com.company.collabSphere_backend.service.StudentDashboardService;
 import com.company.collabSphere_backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final StudentDashboardService studentDashboardService;
 
 
 
@@ -52,5 +55,13 @@ public class UserController {
         log.info("Deleting user with ID: {}", id);
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    //    Get Student Dashboard
+
+    @GetMapping("/student/{id}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<StudentDashboardDto> getStudentDashboard(@PathVariable Long id){
+        return ResponseEntity.ok(studentDashboardService.getStudentDashboard(id));
     }
 }
