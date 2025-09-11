@@ -71,6 +71,7 @@ public class ProjectController {
 
 
     // Get projects for a specific student
+     // that is the logged-in user
 
     @GetMapping("/owner/{ownerId}")
     @PreAuthorize("hasRole('STUDENT')")
