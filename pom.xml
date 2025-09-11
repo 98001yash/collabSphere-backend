@@ -97,6 +97,14 @@
 			<scope>runtime</scope>
 		</dependency>
 
+<!--		web 3 dependency-->
+		<dependency>
+			<groupId>org.web3j</groupId>
+			<artifactId>core</artifactId>
+			<version>4.9.4</version>
+		</dependency>
+
+
 
 	</dependencies>
 
