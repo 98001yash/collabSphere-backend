@@ -26,6 +26,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final NotificationService notificationService; // ✅ Added NotificationService
 
     // Create project
     public ProjectResponseDto createProject(ProjectRequestDto projectRequestDto, Long ownerId) {
@@ -38,7 +39,7 @@ public class ProjectService {
         project.setOwner(owner);
         project.setStatus(ProjectStatus.PENDING);
 
-        //  Ensure location is set (fallback in case ModelMapper skips it)
+        // Ensure location is set
         project.setLocation(
                 GeometryUtil.createPoint(projectRequestDto.getLatitude(), projectRequestDto.getLongitude())
         );
@@ -46,14 +47,22 @@ public class ProjectService {
         Project savedProject = projectRepository.save(project);
         log.info("Project created successfully with id: {}", savedProject.getId());
 
+        // 🔔 Notify admins/faculty about new project
+        // Here, assuming admin has userId = 1L. You can loop through multiple admins if needed
+        Long adminId = 1L;
+        notificationService.createNotification(
+                adminId,
+                "PROJECT_CREATED",
+                "New project created: " + savedProject.getTitle(),
+                savedProject.getId()
+        );
+
         return modelMapper.map(savedProject, ProjectResponseDto.class);
     }
-
 
     // Get all projects
     public List<ProjectResponseDto> getAllProjects() {
         log.info("Fetching all projects");
-
         return projectRepository.findAll().stream()
                 .map(project -> modelMapper.map(project, ProjectResponseDto.class))
                 .collect(Collectors.toList());
@@ -79,6 +88,14 @@ public class ProjectService {
         project.setStatus(status);
         Project updatedProject = projectRepository.save(project);
 
+        // 🔔 Notify project owner about status update
+        notificationService.createNotification(
+                project.getOwner().getId(),
+                "PROJECT_STATUS_UPDATED",
+                "Your project '" + project.getTitle() + "' status has been updated to " + status,
+                project.getId()
+        );
+
         return modelMapper.map(updatedProject, ProjectResponseDto.class);
     }
 
@@ -91,17 +108,25 @@ public class ProjectService {
 
         projectRepository.delete(project);
         log.info("Project with id {} deleted successfully", id);
+
+        // 🔔 Notify owner about deletion
+        notificationService.createNotification(
+                project.getOwner().getId(),
+                "PROJECT_DELETED",
+                "Your project '" + project.getTitle() + "' has been deleted",
+                project.getId()
+        );
     }
 
-    // Get project for a specific owner
-    public List<ProjectResponseDto> getProjectByOwner(Long ownerId){
-        log.info("Fetching projects for ownerId: {}",ownerId);
+    // Get projects for a specific owner
+    public List<ProjectResponseDto> getProjectByOwner(Long ownerId) {
+        log.info("Fetching projects for ownerId: {}", ownerId);
 
         User owner = userRepository.findById(ownerId)
-                .orElseThrow(()->new ResourceClosedException("Owner not found with id: "+ownerId));
+                .orElseThrow(() -> new ResourceClosedException("Owner not found with id: " + ownerId));
 
         return projectRepository.findByOwner(owner).stream()
-                .map(project->modelMapper.map(project, ProjectResponseDto.class))
+                .map(project -> modelMapper.map(project, ProjectResponseDto.class))
                 .collect(Collectors.toList());
     }
 }
