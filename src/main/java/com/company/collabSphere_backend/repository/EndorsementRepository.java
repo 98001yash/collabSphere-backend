@@ -21,4 +21,6 @@ public interface EndorsementRepository extends JpaRepository<Endorsement,Long> {
 
     List<Endorsement> findByStudent(User student);
 
+    boolean existsByFacultyAndProject(User faculty, Project project);
+
 }

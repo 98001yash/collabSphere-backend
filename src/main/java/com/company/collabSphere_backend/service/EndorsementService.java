@@ -1,6 +1,5 @@
 package com.company.collabSphere_backend.service;
 
-
 import com.company.collabSphere_backend.dtos.EndorsementRequestDto;
 import com.company.collabSphere_backend.dtos.EndorsementResponseDto;
 import com.company.collabSphere_backend.entity.Endorsement;
@@ -15,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,14 +29,21 @@ public class EndorsementService {
     private final ProjectRepository projectRepository;
     private final ModelMapper modelMapper;
 
-    public EndorsementResponseDto endorseProject(EndorsementRequestDto requestDto){
-        log.info("Faculty {} is endorsing project {} ",requestDto.getFacultyId(), requestDto.getProjectId());
+    @Transactional
+    public EndorsementResponseDto endorseProject(EndorsementRequestDto requestDto) {
+        log.info("Faculty {} is endorsing project {}", requestDto.getFacultyId(), requestDto.getProjectId());
 
         User faculty = userRepository.findById(requestDto.getFacultyId())
-                .orElseThrow(()->new ResourceNotFoundException("Faculty not found with id: "+requestDto.getFacultyId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Faculty not found with id: " + requestDto.getFacultyId()));
 
         Project project = projectRepository.findById(requestDto.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id " + requestDto.getProjectId()));
+
+        // prevent duplicate endorsement from same faculty on same project
+        boolean alreadyEndorsed = endorsementRepository.existsByFacultyAndProject(faculty, project);
+        if (alreadyEndorsed) {
+            throw new IllegalStateException("Faculty has already endorsed this project");
+        }
 
         Endorsement endorsement = Endorsement.builder()
                 .faculty(faculty)
@@ -46,6 +53,15 @@ public class EndorsementService {
                 .build();
 
         Endorsement saved = endorsementRepository.save(endorsement);
+
+        // update owner reputation & project score
+        User owner = project.getOwner();
+        owner.setReputationPoints(owner.getReputationPoints() + 10); // +10 per endorsement
+        project.setEndorsementScore(project.getEndorsementScore() + 1);
+
+        userRepository.save(owner);
+        projectRepository.save(project);
+
         return modelMapper.map(saved, EndorsementResponseDto.class);
     }
 
@@ -62,8 +78,8 @@ public class EndorsementService {
                 .collect(Collectors.toList());
     }
 
-    // get endorsement by faculty
-    public List<EndorsementResponseDto> getEndorsementByFaculty(Long facultyId){
+    // Get endorsement by faculty
+    public List<EndorsementResponseDto> getEndorsementsByFaculty(Long facultyId) {
         log.info("Fetching endorsements given by faculty {}", facultyId);
 
         User faculty = userRepository.findById(facultyId)
@@ -75,16 +91,34 @@ public class EndorsementService {
                 .collect(Collectors.toList());
     }
 
-    // revoke endorsement
-    public EndorsementResponseDto revokeEndorsement(Long endorsementId){
-        log.info("Revoking endorsement with id: {}",endorsementId);
+    /**
+     * Revoke an endorsement.
+     * Updates endorsement status, reduces project score & owner reputation.
+     */
+    @Transactional
+    public EndorsementResponseDto revokeEndorsement(Long endorsementId) {
+        log.info("Revoking endorsement with id: {}", endorsementId);
 
-        Endorsement endorsement =endorsementRepository.findById(endorsementId)
-                .orElseThrow(()->new ResourceNotFoundException("Endorsement not found with id "+endorsementId));
+        Endorsement endorsement = endorsementRepository.findById(endorsementId)
+                .orElseThrow(() -> new ResourceNotFoundException("Endorsement not found with id " + endorsementId));
+
+        if (endorsement.getStatus() == EndorsementStatus.REVOKED) {
+            throw new IllegalStateException("Endorsement is already revoked");
+        }
 
         endorsement.setStatus(EndorsementStatus.REVOKED);
-        Endorsement updated = endorsementRepository.save(endorsement);
 
+        Project project = endorsement.getProject();
+        User owner = project.getOwner();
+
+        // reduce points & score
+        owner.setReputationPoints(Math.max(0, owner.getReputationPoints() - 10));
+        project.setEndorsementScore(Math.max(0, project.getEndorsementScore() - 1));
+
+        userRepository.save(owner);
+        projectRepository.save(project);
+
+        Endorsement updated = endorsementRepository.save(endorsement);
         return modelMapper.map(updated, EndorsementResponseDto.class);
     }
 }

@@ -41,7 +41,7 @@ public class EndorsementController {
     @GetMapping("/faculty/{facultyId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<EndorsementResponseDto>> getEndorsementByFaculty(@PathVariable Long facultyId){
-        return ResponseEntity.ok(endorsementService.getEndorsementByFaculty(facultyId));
+        return ResponseEntity.ok(endorsementService.getEndorsementsByFaculty(facultyId));
     }
 
 
