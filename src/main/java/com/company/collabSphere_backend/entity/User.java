@@ -52,4 +52,8 @@ public class User {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Column(nullable = false)
+    private Integer reputationPoints = 0;
+
 }

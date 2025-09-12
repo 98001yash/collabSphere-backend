@@ -61,4 +61,13 @@ public class Project {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> contributors = new ArrayList<>();
+
+
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Endorsement> endorsements = new ArrayList<>();
+
+    @Column(nullable = false)
+    private Integer endorsementScore = 0;
+
 }
