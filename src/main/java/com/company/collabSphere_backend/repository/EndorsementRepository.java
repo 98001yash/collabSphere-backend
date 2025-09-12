@@ -5,7 +5,6 @@ import com.company.collabSphere_backend.entity.Project;
 import com.company.collabSphere_backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface EndorsementRepository extends JpaRepository<Endorsement,Long> {
