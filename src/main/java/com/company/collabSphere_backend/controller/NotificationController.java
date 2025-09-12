@@ -4,10 +4,9 @@ package com.company.collabSphere_backend.controller;
 import com.company.collabSphere_backend.entity.Notification;
 import com.company.collabSphere_backend.service.NotificationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,4 +24,17 @@ public class NotificationController {
     ) {
         return notificationService.createNotification(userId, type, message, relatedEntityId);
     }
+
+
+    @GetMapping("/user/{userId}")
+    public List<Notification> getNotificationsForUser(@PathVariable Long userId){
+        return notificationService.getNotificationForUser(userId);
+    }
+
+    // Mark the notification as READ
+    @PutMapping("/{notificationId}/read")
+    public Notification markAsRead(@PathVariable Long notificationId){
+        return notificationService.markAsRead(notificationId);
+    }
+
 }
