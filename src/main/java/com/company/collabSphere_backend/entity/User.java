@@ -53,8 +53,11 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer reputationPoints = 0;
 
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer endorsementScore = 0;
+
 
 }

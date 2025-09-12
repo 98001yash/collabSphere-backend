@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -21,6 +22,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String requestPath = request.getServletPath();
+
+        // Define public routes (must match what you configured in SecurityFilterChain)
+        List<String> publicRoutes = List.of("/auth/", "/hotels/", "/v3/api-docs", "/swagger-ui", "/webhook", "/swagger-ui/index.html", "/swagger-ui/");
+        return publicRoutes.stream().anyMatch(requestPath::startsWith);
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

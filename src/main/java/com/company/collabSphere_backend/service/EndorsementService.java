@@ -56,8 +56,13 @@ public class EndorsementService {
 
         // update owner reputation & project score
         User owner = project.getOwner();
-        owner.setReputationPoints(owner.getReputationPoints() + 10); // +10 per endorsement
-        project.setEndorsementScore(project.getEndorsementScore() + 1);
+        owner.setReputationPoints(
+                (owner.getReputationPoints() == null ? 0 : owner.getReputationPoints()) + 10
+        );
+        project.setEndorsementScore(
+                (project.getEndorsementScore() == null ? 0 : project.getEndorsementScore()) + 1
+        );
+
 
         userRepository.save(owner);
         projectRepository.save(project);

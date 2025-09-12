@@ -67,6 +67,7 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Endorsement> endorsements = new ArrayList<>();
 
+    @Column(nullable = false)
     private Integer endorsementScore = 0;
 
 }
