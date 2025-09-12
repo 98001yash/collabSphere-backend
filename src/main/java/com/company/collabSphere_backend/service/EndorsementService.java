@@ -28,6 +28,7 @@ public class EndorsementService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final ModelMapper modelMapper;
+    private final NotificationService notificationService;
 
     @Transactional
     public EndorsementResponseDto endorseProject(EndorsementRequestDto requestDto) {
@@ -39,7 +40,7 @@ public class EndorsementService {
         Project project = projectRepository.findById(requestDto.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id " + requestDto.getProjectId()));
 
-        // prevent duplicate endorsement from same faculty on same project
+        // prevent duplicate endorsement
         boolean alreadyEndorsed = endorsementRepository.existsByFacultyAndProject(faculty, project);
         if (alreadyEndorsed) {
             throw new IllegalStateException("Faculty has already endorsed this project");
@@ -56,16 +57,19 @@ public class EndorsementService {
 
         // update owner reputation & project score
         User owner = project.getOwner();
-        owner.setReputationPoints(
-                (owner.getReputationPoints() == null ? 0 : owner.getReputationPoints()) + 10
-        );
-        project.setEndorsementScore(
-                (project.getEndorsementScore() == null ? 0 : project.getEndorsementScore()) + 1
-        );
-
+        owner.setReputationPoints((owner.getReputationPoints() == null ? 0 : owner.getReputationPoints()) + 10);
+        project.setEndorsementScore((project.getEndorsementScore() == null ? 0 : project.getEndorsementScore()) + 1);
 
         userRepository.save(owner);
         projectRepository.save(project);
+
+        // 🔔 Notify project owner about endorsement
+        notificationService.createNotification(
+                owner.getId(),
+                "PROJECT_ENDORSED",
+                "Your project '" + project.getTitle() + "' has been endorsed by " + faculty.getName(),
+                project.getId()
+        );
 
         return modelMapper.map(saved, EndorsementResponseDto.class);
     }
@@ -122,6 +126,14 @@ public class EndorsementService {
 
         userRepository.save(owner);
         projectRepository.save(project);
+
+        // 🔔 Notify project owner about revoked endorsement
+        notificationService.createNotification(
+                owner.getId(),
+                "ENDORSEMENT_REVOKED",
+                "An endorsement for your project '" + project.getTitle() + "' has been revoked by " + endorsement.getFaculty().getName(),
+                project.getId()
+        );
 
         Endorsement updated = endorsementRepository.save(endorsement);
         return modelMapper.map(updated, EndorsementResponseDto.class);
