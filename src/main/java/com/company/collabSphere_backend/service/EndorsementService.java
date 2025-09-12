@@ -29,6 +29,7 @@ public class EndorsementService {
     private final ProjectRepository projectRepository;
     private final ModelMapper modelMapper;
     private final NotificationService notificationService;
+    private final EmailService emailService; // ✅ Added email service
 
     @Transactional
     public EndorsementResponseDto endorseProject(EndorsementRequestDto requestDto) {
@@ -63,7 +64,7 @@ public class EndorsementService {
         userRepository.save(owner);
         projectRepository.save(project);
 
-        // 🔔 Notify project owner about endorsement
+        // 🔔 In-app notification
         notificationService.createNotification(
                 owner.getId(),
                 "PROJECT_ENDORSED",
@@ -71,39 +72,18 @@ public class EndorsementService {
                 project.getId()
         );
 
+        // ✉️ Email notification
+        emailService.sendEmail(
+                owner.getEmail(),
+                "Your Project Has Been Endorsed",
+                "Congratulations! Your project '" + project.getTitle() + "' has been endorsed by " + faculty.getName() +
+                        ". Feedback: " + requestDto.getFeedback()
+        );
+
         return modelMapper.map(saved, EndorsementResponseDto.class);
     }
 
-    // Get endorsement by project
-    public List<EndorsementResponseDto> getEndorsementsByProject(Long projectId) {
-        log.info("Fetching endorsements for project {}", projectId);
-
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project not found with id " + projectId));
-
-        return endorsementRepository.findByProject(project)
-                .stream()
-                .map(e -> modelMapper.map(e, EndorsementResponseDto.class))
-                .collect(Collectors.toList());
-    }
-
-    // Get endorsement by faculty
-    public List<EndorsementResponseDto> getEndorsementsByFaculty(Long facultyId) {
-        log.info("Fetching endorsements given by faculty {}", facultyId);
-
-        User faculty = userRepository.findById(facultyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Faculty not found with id " + facultyId));
-
-        return endorsementRepository.findByFaculty(faculty)
-                .stream()
-                .map(e -> modelMapper.map(e, EndorsementResponseDto.class))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Revoke an endorsement.
-     * Updates endorsement status, reduces project score & owner reputation.
-     */
+    // Revoke endorsement
     @Transactional
     public EndorsementResponseDto revokeEndorsement(Long endorsementId) {
         log.info("Revoking endorsement with id: {}", endorsementId);
@@ -127,7 +107,7 @@ public class EndorsementService {
         userRepository.save(owner);
         projectRepository.save(project);
 
-        // 🔔 Notify project owner about revoked endorsement
+        // 🔔 In-app notification
         notificationService.createNotification(
                 owner.getId(),
                 "ENDORSEMENT_REVOKED",
@@ -135,7 +115,35 @@ public class EndorsementService {
                 project.getId()
         );
 
+        // ✉️ Email notification
+        emailService.sendEmail(
+                owner.getEmail(),
+                "Endorsement Revoked",
+                "Attention! An endorsement for your project '" + project.getTitle() + "' has been revoked by " +
+                        endorsement.getFaculty().getName() + "."
+        );
+
         Endorsement updated = endorsementRepository.save(endorsement);
         return modelMapper.map(updated, EndorsementResponseDto.class);
+    }
+
+    // Get endorsements by project
+    public List<EndorsementResponseDto> getEndorsementsByProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found with id " + projectId));
+
+        return endorsementRepository.findByProject(project).stream()
+                .map(e -> modelMapper.map(e, EndorsementResponseDto.class))
+                .collect(Collectors.toList());
+    }
+
+    // Get endorsements by faculty
+    public List<EndorsementResponseDto> getEndorsementsByFaculty(Long facultyId) {
+        User faculty = userRepository.findById(facultyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Faculty not found with id " + facultyId));
+
+        return endorsementRepository.findByFaculty(faculty).stream()
+                .map(e -> modelMapper.map(e, EndorsementResponseDto.class))
+                .collect(Collectors.toList());
     }
 }
