@@ -26,7 +26,8 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
-    private final NotificationService notificationService; // ✅ Added NotificationService
+    private final NotificationService notificationService; // In-app notifications
+    private final EmailService emailService; // Email notifications
 
     // Create project
     public ProjectResponseDto createProject(ProjectRequestDto projectRequestDto, Long ownerId) {
@@ -47,14 +48,20 @@ public class ProjectService {
         Project savedProject = projectRepository.save(project);
         log.info("Project created successfully with id: {}", savedProject.getId());
 
-        // 🔔 Notify admins/faculty about new project
-        // Here, assuming admin has userId = 1L. You can loop through multiple admins if needed
-        Long adminId = 1L;
+        // 🔔 In-app notification
+        Long adminId = 1L; // Example: notify admin
         notificationService.createNotification(
                 adminId,
                 "PROJECT_CREATED",
                 "New project created: " + savedProject.getTitle(),
                 savedProject.getId()
+        );
+
+        // ✉️ Email notification
+        emailService.sendEmail(
+                owner.getEmail(),
+                "Project Created Successfully",
+                "Your project '" + savedProject.getTitle() + "' has been created successfully."
         );
 
         return modelMapper.map(savedProject, ProjectResponseDto.class);
@@ -88,12 +95,19 @@ public class ProjectService {
         project.setStatus(status);
         Project updatedProject = projectRepository.save(project);
 
-        // 🔔 Notify project owner about status update
+        // 🔔 In-app notification
         notificationService.createNotification(
                 project.getOwner().getId(),
                 "PROJECT_STATUS_UPDATED",
                 "Your project '" + project.getTitle() + "' status has been updated to " + status,
                 project.getId()
+        );
+
+        // ✉️ Email notification
+        emailService.sendEmail(
+                project.getOwner().getEmail(),
+                "Project Status Updated",
+                "Your project '" + project.getTitle() + "' status has been updated to " + status
         );
 
         return modelMapper.map(updatedProject, ProjectResponseDto.class);
@@ -109,12 +123,19 @@ public class ProjectService {
         projectRepository.delete(project);
         log.info("Project with id {} deleted successfully", id);
 
-        // 🔔 Notify owner about deletion
+        // 🔔 In-app notification
         notificationService.createNotification(
                 project.getOwner().getId(),
                 "PROJECT_DELETED",
                 "Your project '" + project.getTitle() + "' has been deleted",
                 project.getId()
+        );
+
+        // ✉️ Email notification
+        emailService.sendEmail(
+                project.getOwner().getEmail(),
+                "Project Deleted",
+                "Your project '" + project.getTitle() + "' has been deleted."
         );
     }
 
