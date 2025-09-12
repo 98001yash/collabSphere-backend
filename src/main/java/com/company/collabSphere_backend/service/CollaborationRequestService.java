@@ -1,6 +1,5 @@
 package com.company.collabSphere_backend.service;
 
-
 import com.company.collabSphere_backend.dtos.CollaborationDecisionDto;
 import com.company.collabSphere_backend.dtos.CollaborationRequestDto;
 import com.company.collabSphere_backend.dtos.CollaborationResponseDto;
@@ -28,6 +27,7 @@ public class CollaborationRequestService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final ModelMapper modelMapper;
+    private final NotificationService notificationService;
 
     public CollaborationResponseDto applyForCollaboration(CollaborationRequestDto requestDto){
         log.info("Student {} applying for project {}",requestDto.getStudentId(),requestDto.getProjectId());
@@ -38,13 +38,10 @@ public class CollaborationRequestService {
         Project project = projectRepository.findById(requestDto.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id " + requestDto.getProjectId()));
 
-        //  Prevent owner from applying to their own project
         if (project.getOwner().getId().equals(student.getId())) {
-            log.error("Owner {} attempted to apply for their own project {}", student.getId(), project.getId());
             throw new IllegalArgumentException("Project owner cannot apply for collaboration on their own project");
         }
 
-        // Prevent duplicates requests
         collaborationRequestRepository.findByStudentAndProject(student, project)
                 .ifPresent(existing -> {
                     throw new RuntimeException("Request already exists for this project and student");
@@ -57,12 +54,19 @@ public class CollaborationRequestService {
                 .build();
 
         CollaborationRequest saved = collaborationRequestRepository.save(request);
-        log.info("Collaboration request {} created successfully",saved.getId());
+        log.info("Collaboration request {} created successfully", saved.getId());
+
+        // 🔔 Notify project owner about new collaboration request
+        notificationService.createNotification(
+                project.getOwner().getId(),
+                "NEW_COLLAB_REQUEST",
+                "Student " + student.getName() + " has applied to collaborate on your project '" + project.getTitle() + "'",
+                project.getId()
+        );
 
         return modelMapper.map(saved, CollaborationResponseDto.class);
     }
 
-    // product owner accepts or rejects request
     public CollaborationResponseDto decideCollaboration(Long requestId, CollaborationDecisionDto decisionDto, Long ownerId){
         log.info("Owner {} deciding request {} with status {}",ownerId, requestId,decisionDto.getStatus());
 
@@ -77,10 +81,18 @@ public class CollaborationRequestService {
         CollaborationRequest updated = collaborationRequestRepository.save(request);
 
         log.info("Request {} updated to {}",updated.getId(),updated.getStatus());
+
+        // 🔔 Notify student about decision
+        notificationService.createNotification(
+                request.getStudent().getId(),
+                "COLLAB_REQUEST_" + decisionDto.getStatus(), // e.g., COLLAB_REQUEST_ACCEPTED / COLLAB_REQUEST_REJECTED
+                "Your collaboration request for project '" + request.getProject().getTitle() + "' has been " + decisionDto.getStatus().name().toLowerCase(),
+                request.getProject().getId()
+        );
+
         return modelMapper.map(updated, CollaborationResponseDto.class);
     }
 
-    // get all request for a project
     public List<CollaborationResponseDto> getRequestsForProject(Long projectId){
         log.info("Fetching collaboration requests for project {}",projectId);
 
@@ -92,7 +104,6 @@ public class CollaborationRequestService {
                 .collect(Collectors.toList());
     }
 
-    // get all requests made by a student
     public List<CollaborationResponseDto> getRequestsByStudent(Long studentId){
         log.info("Fetching collaboration requests made by student {}",studentId);
 
