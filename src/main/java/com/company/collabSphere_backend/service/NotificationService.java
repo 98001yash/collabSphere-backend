@@ -6,6 +6,8 @@ import com.company.collabSphere_backend.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -20,6 +22,19 @@ public class NotificationService {
         notification.setMessage(message);
         notification.setRelatedEntityId(relatedEntityId);
         notification.setStatus("UNREAD");
+        return notificationRepository.save(notification);
+    }
+
+
+    // get All notification for a user
+    public List<Notification> getNotificationForUser(Long userId){
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    //Mark a notification as read
+    public Notification markAsRead(Long notificationId){
+        Notification notification = notificationRepository.findById(notificationId).orElseThrow();
+        notification.setStatus("READ");
         return notificationRepository.save(notification);
     }
 }
