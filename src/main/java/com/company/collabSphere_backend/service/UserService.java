@@ -63,4 +63,18 @@ public class UserService {
         userRepository.delete(user);
         log.info("User with id {} deleted successfully", id);
     }
+
+
+
+
+    // Get current user profile by username (from Authentication principal)
+    public UserResponseDto getUserByUsername(String username) {
+        log.info("Fetching user by username: {}", username);
+
+        User user = userRepository.findByUsername(username) // or findByEmail(username) if login is by email
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username " + username));
+
+        return modelMapper.map(user, UserResponseDto.class);
+    }
+
 }

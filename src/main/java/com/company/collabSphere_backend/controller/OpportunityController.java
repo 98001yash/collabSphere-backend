@@ -43,8 +43,6 @@ public class OpportunityController {
         log.info("API Call: Fetch Active Opportunities");
         return ResponseEntity.ok(opportunityService.getActiveOpportunities());
     }
-
-
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('STUDENT','FACULTY','ADMIN')")
     public ResponseEntity<OpportunityResponseDto> getOpportunityById(@PathVariable Long id) {
