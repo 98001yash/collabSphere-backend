@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -76,4 +77,13 @@ public class UserController {
         log.info("Fetching dashboard for faculty {}", facultyId);
         return ResponseEntity.ok(facultyDashboardService.getFacultyDashboard(facultyId));
     }
+
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> getCurrentUserProfile(Authentication authentication) {
+        String username = authentication.getName(); // principal name
+        log.info("Fetching profile for logged-in user: {}", username);
+        return ResponseEntity.ok(userService.getUserByUsername(username));
+    }
+
 }
