@@ -24,3 +24,5 @@ public class CorsConfig {
     }
 }
 
+// configuration of the corsConfig for the backend and frontend integration
+
