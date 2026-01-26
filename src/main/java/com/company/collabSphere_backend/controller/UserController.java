@@ -81,9 +81,9 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getCurrentUserProfile(Authentication authentication) {
-        String username = authentication.getName(); // principal name
-        log.info("Fetching profile for logged-in user: {}", username);
-        return ResponseEntity.ok(userService.getUserByUsername(username));
+        String email = authentication.getName(); // from JWT principal
+        UserResponseDto user = userService.getUserByEmail(email);
+        return ResponseEntity.ok(user);
     }
 
 }

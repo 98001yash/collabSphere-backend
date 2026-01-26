@@ -68,13 +68,11 @@ public class UserService {
 
 
     // Get current user profile by username (from Authentication principal)
-    public UserResponseDto getUserByUsername(String username) {
-        log.info("Fetching user by username: {}", username);
-
-        User user = userRepository.findByUsername(username) // or findByEmail(username) if login is by email
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with username " + username));
-
+    public UserResponseDto getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email " + email));
         return modelMapper.map(user, UserResponseDto.class);
     }
+
 
 }

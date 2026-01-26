@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgis/postgis:15-3.4
+    container_name: collabsphere-postgres
+    environment:
+      POSTGRES_DB: collabsphere
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yash8252
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: .
+    container_name: collabsphere-backend
+    depends_on:
+      - postgres
+    ports:
+      - "9090:9090"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/collabsphere
+      DB_USERNAME: postgres
+      DB_PASSWORD: yash8252
+
+volumes:
+  postgres_data:
